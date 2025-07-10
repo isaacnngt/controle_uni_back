@@ -25,4 +25,22 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     @Query("SELECT u FROM Usuario u WHERE u.cargoUnijovem IS NOT NULL AND u.cargoUnijovem != ''")
     List<Usuario> findByCargoUnijovemNotEmpty();
+
+    // === QUERIES DE ANIVERSARIANTES ===
+
+    // Query simplificada para aniversariantes por mês
+    @Query("SELECT u FROM Usuario u WHERE EXTRACT(MONTH FROM u.dataNascimento) = :mes AND u.dataNascimento IS NOT NULL ORDER BY EXTRACT(DAY FROM u.dataNascimento)")
+    List<Usuario> findByMesAniversario(@Param("mes") Integer mes);
+
+    // Query para todos com data de nascimento
+    @Query("SELECT u FROM Usuario u WHERE u.dataNascimento IS NOT NULL ORDER BY EXTRACT(MONTH FROM u.dataNascimento), EXTRACT(DAY FROM u.dataNascimento)")
+    List<Usuario> findAllWithDataNascimentoOrdered();
+
+    // Query para aniversariantes de hoje
+    @Query("SELECT u FROM Usuario u WHERE EXTRACT(MONTH FROM u.dataNascimento) = EXTRACT(MONTH FROM CURRENT_DATE) AND EXTRACT(DAY FROM u.dataNascimento) = EXTRACT(DAY FROM CURRENT_DATE)")
+    List<Usuario> findAniversariantesHoje();
+
+    // Query SIMPLIFICADA para próximos aniversariantes (sem lógica complexa de virada de ano)
+    @Query(value = "SELECT * FROM usuario_tb u WHERE u.dt_nascimento IS NOT NULL ORDER BY u.dt_nascimento LIMIT :limite", nativeQuery = true)
+    List<Usuario> findProximosAniversariantes(@Param("limite") Integer limite);
 }

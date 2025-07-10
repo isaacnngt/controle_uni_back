@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -108,5 +109,29 @@ public class UsuarioController {
     public ResponseEntity<Long> contarUsuarios() {
         long total = usuarioService.contarTodos();
         return ResponseEntity.ok(total);
+    }
+
+    @GetMapping("/aniversariantes")
+    public ResponseEntity<Map<String, List<Usuario>>> listarAniversariantesPorMes() {
+        Map<String, List<Usuario>> aniversariantes = usuarioService.listarAniversariantesPorMes();
+        return ResponseEntity.ok(aniversariantes);
+    }
+
+    @GetMapping("/aniversariantes/mes/{mes}")
+    public ResponseEntity<List<Usuario>> listarAniversariantesDoMes(@PathVariable Integer mes) {
+        List<Usuario> aniversariantes = usuarioService.listarAniversariantesDoMes(mes);
+        return ResponseEntity.ok(aniversariantes);
+    }
+
+    @GetMapping("/aniversariantes/hoje")
+    public ResponseEntity<List<Usuario>> listarAniversariantesHoje() {
+        List<Usuario> aniversariantes = usuarioService.listarAniversariantesHoje();
+        return ResponseEntity.ok(aniversariantes);
+    }
+
+    @GetMapping("/aniversariantes/proximos/{dias}")
+    public ResponseEntity<List<Usuario>> listarProximosAniversariantes(@PathVariable Integer dias) {
+        List<Usuario> aniversariantes = usuarioService.listarProximosAniversariantes(dias);
+        return ResponseEntity.ok(aniversariantes);
     }
 }

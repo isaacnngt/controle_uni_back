@@ -6,8 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional
@@ -83,5 +82,51 @@ public class UsuarioService {
 
     public long contarTodos() {
         return usuarioRepository.count();
+    }
+
+    public Map<String, List<Usuario>> listarAniversariantesPorMes() {
+        List<Usuario> todosUsuarios = usuarioRepository.findAllWithDataNascimentoOrdered();
+
+        // Nomes dos meses em português
+        String[] meses = {
+                "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+                "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+        };
+
+        // Criar mapa ordenado com todos os meses
+        Map<String, List<Usuario>> aniversariantesPorMes = new LinkedHashMap<>();
+
+        // Inicializar todos os meses
+        for (int i = 1; i <= 12; i++) {
+            aniversariantesPorMes.put(meses[i-1], new ArrayList<>());
+        }
+
+        // Agrupar usuários por mês
+        for (Usuario usuario : todosUsuarios) {
+            if (usuario.getDataNascimento() != null) {
+                int mes = usuario.getDataNascimento().getMonthValue();
+                aniversariantesPorMes.get(meses[mes-1]).add(usuario);
+            }
+        }
+
+        return aniversariantesPorMes;
+    }
+
+    public List<Usuario> listarAniversariantesDoMes(Integer mes) {
+        if (mes < 1 || mes > 12) {
+            throw new IllegalArgumentException("Mês deve estar entre 1 e 12");
+        }
+        return usuarioRepository.findByMesAniversario(mes);
+    }
+
+    public List<Usuario> listarAniversariantesHoje() {
+        return usuarioRepository.findAniversariantesHoje();
+    }
+
+    public List<Usuario> listarProximosAniversariantes(Integer dias) {
+        if (dias == null || dias <= 0) {
+            dias = 30; // Default 30 dias
+        }
+        return usuarioRepository.findProximosAniversariantes(dias);
     }
 }
