@@ -29,4 +29,6 @@ public interface PrestacaoContasRepository extends JpaRepository<PrestacaoContas
 
     @Query("SELECT pc FROM PrestacaoContas pc WHERE pc.anoVigente = :anoVigente AND (pc.percentualMensalidadePago < 100 OR pc.percentualCamisaPago < 100)")
     List<PrestacaoContas> findWithDebtsByAno(@Param("anoVigente") Integer anoVigente);
+
+
 }

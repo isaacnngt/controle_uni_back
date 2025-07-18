@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -114,6 +115,16 @@ public class PrestacaoContasController {
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/resumo-geral/{anoVigente}")
+    public ResponseEntity<List<Map<String, Object>>> buscarResumoGeral(@PathVariable Integer anoVigente) {
+        try {
+            List<Map<String, Object>> resumo = prestacaoContasService.buscarResumoGeral(anoVigente);
+            return ResponseEntity.ok(resumo);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 }

@@ -1,12 +1,16 @@
 package com.igreja.unijovem.service;
 
 import com.igreja.unijovem.entity.Parametros;
+import com.igreja.unijovem.entity.PrestacaoContas;
+import com.igreja.unijovem.entity.Usuario;
 import com.igreja.unijovem.repository.ParametrosRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -36,4 +40,5 @@ public class ParametrosService {
         }
         return buscarParametrosAtuais().orElse(null);
     }
+
 }

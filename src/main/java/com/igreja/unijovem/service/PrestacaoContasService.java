@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -157,5 +157,60 @@ public class PrestacaoContasService {
         } else {
             throw new RuntimeException("Prestação de contas não encontrada com ID: " + id);
         }
+    }
+
+    public List<Map<String, Object>> buscarResumoGeral(Integer anoVigente) {
+        // Buscar todos os usuários
+        List<Usuario> usuarios = usuarioRepository.findAll();
+
+        // Buscar prestações do ano
+        List<PrestacaoContas> prestacoes = prestacaoContasRepository.findByAnoVigente(anoVigente);
+
+        // Criar mapa para acesso rápido
+        Map<Long, PrestacaoContas> prestacoesPorUsuario = prestacoes.stream()
+                .collect(Collectors.toMap(p -> p.getUsuario().getId(), p -> p));
+
+        // Buscar parâmetros atuais
+        Optional<Parametros> parametros = parametrosRepository.findLatest();
+
+        List<Map<String, Object>> resultado = new ArrayList<>();
+
+        for (Usuario usuario : usuarios) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("usuarioId", usuario.getId());
+            item.put("usuarioNome", usuario.getNome());
+            item.put("anoVigente", anoVigente);
+
+            PrestacaoContas prestacao = prestacoesPorUsuario.get(usuario.getId());
+
+            if (prestacao != null) {
+                // Tem prestação
+                item.put("prestacaoId", prestacao.getId());
+                item.put("valorMensalidadeTotal", prestacao.getValorMensalidadeTotal());
+                item.put("valorMensalidadePago", prestacao.getValorMensalidadePago());
+                item.put("valorCamisaTotal", prestacao.getValorCamisaTotal());
+                item.put("valorCamisaPago", prestacao.getValorCamisaPago());
+                item.put("formaPagamento", prestacao.getFormaPagamento());
+                item.put("percentualMens", prestacao.getPercentualMensalidadePago());
+                item.put("percentualCamisa", prestacao.getPercentualCamisaPago());
+            } else {
+                // Não tem prestação
+                item.put("prestacaoId", null);
+                item.put("valorMensalidadeTotal", parametros.isPresent() ? parametros.get().getValorMensalidade() : BigDecimal.ZERO);
+                item.put("valorMensalidadePago", BigDecimal.ZERO);
+                item.put("valorCamisaTotal", parametros.isPresent() ? parametros.get().getValorCamisa() : BigDecimal.ZERO);
+                item.put("valorCamisaPago", BigDecimal.ZERO);
+                item.put("formaPagamento", null);
+                item.put("percentualMens", BigDecimal.ZERO);
+                item.put("percentualCamisa", BigDecimal.ZERO);
+            }
+
+            resultado.add(item);
+        }
+
+        // Ordenar por nome
+        resultado.sort((a, b) -> ((String)a.get("usuarioNome")).compareToIgnoreCase((String)b.get("usuarioNome")));
+
+        return resultado;
     }
 }
